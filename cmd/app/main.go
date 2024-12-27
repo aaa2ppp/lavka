@@ -8,43 +8,77 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	httpSwagger "github.com/swaggo/http-swagger/v2"
+	"github.com/joho/godotenv"
 
 	"lavka/internal/api"
+	"lavka/internal/config"
 	"lavka/internal/middleware"
+	"lavka/internal/swagger"
 )
 
 func main() {
 
-	// setup logger
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	})))
+	godotenv.Load()
 
-	// create router
-	router := http.NewServeMux()
-
-	// setup swagger
-	// TODO: кто на ком стоял? а проще можно?
-	swaggerDoc, err := os.ReadFile("docs/tz/openapi.json")
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal(err)
+		logFatal("can't load config", err)
 	}
-	router.Handle("GET /swagger/doc.json", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.Write(swaggerDoc) }))
-	router.Handle("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8080/swagger/doc.json")))
 
-	// setup api
+	setupLogger(cfg.Logger)
+
+	mux := http.NewServeMux()
+
+	if err := swagger.Setup(cfg.Swagger, mux); err != nil {
+		slog.Error("can't setup swagger", "error", err)
+	}
+
 	service := api.ServiceStub{}
-	router.Handle("/", api.New(service))
+	mux.Handle("/", middleware.Logging(api.New(service)))
 
-	// setup server
-	server := http.Server{
-		Addr:         ":8080",
-		Handler:      middleware.Logging(router),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+	server := setupServer(cfg.Server, mux)
+
+	log.Printf("startup http-server on %v", server.Addr)
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		logFatal("server fail", err)
+	}
+}
+
+func logFatal(msg string, err error) {
+	slog.Log(context.Background(), slog.LevelError+2, msg, "error", err)
+	os.Exit(1)
+}
+
+func setupLogger(cfg config.Logger) {
+
+	var h slog.Handler
+	if cfg.PlainText {
+		h = slog.NewTextHandler(
+			os.Stderr,
+			&slog.HandlerOptions{
+				Level: cfg.Level,
+			},
+		)
+	} else {
+		h = slog.NewJSONHandler(
+			os.Stderr,
+			&slog.HandlerOptions{
+				Level: cfg.Level,
+			},
+		)
+	}
+
+	slog.SetDefault(slog.New(h))
+}
+
+func setupServer(cfg config.Server, router http.Handler) *http.Server {
+
+	server := &http.Server{
+		Addr:         cfg.Addr,
+		Handler:      router,
+		ReadTimeout:  cfg.ReadTimeout,
+		WriteTimeout: cfg.WriteTimeout,
 	}
 
 	// setup graceful shutdown
@@ -55,7 +89,7 @@ func main() {
 		s := <-c
 		log.Printf("got signal %v", s)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 		defer cancel()
 
 		if err := server.Shutdown(ctx); err != nil {
@@ -63,9 +97,5 @@ func main() {
 		}
 	}()
 
-	// startup server
-	log.Printf("startup http-server on %v", server.Addr)
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		log.Fatalf("server fail: %v", err)
-	}
+	return server
 }

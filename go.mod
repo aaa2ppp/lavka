@@ -2,7 +2,10 @@ module lavka
 
 go 1.23.4
 
-require github.com/swaggo/http-swagger/v2 v2.0.2
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/swaggo/http-swagger/v2 v2.0.2
+)
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
