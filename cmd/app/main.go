@@ -3,26 +3,46 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"lavka/internal/handler"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
+
+	"lavka/internal/api"
+	"lavka/internal/middleware"
 )
 
 func main() {
 
-	// TODO: setup the logger
+	// setup logger
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})))
 
-	service := struct { // fake service
-		handler.Service
-	}{}
+	// create router
+	router := http.NewServeMux()
 
+	// setup swagger
+	// TODO: кто на ком стоял? а проще можно?
+	swaggerDoc, err := os.ReadFile("docs/tz/openapi.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	router.Handle("GET /swagger/doc.json", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.Write(swaggerDoc) }))
+	router.Handle("/swagger/", httpSwagger.Handler(httpSwagger.URL("http://localhost:8080/swagger/doc.json")))
+
+	// setup api
+	service := api.ServiceStub{}
+	router.Handle("/", api.New(service))
+
+	// setup server
 	server := http.Server{
 		Addr:         ":8080",
-		Handler:      handler.New(service),
+		Handler:      middleware.Logging(router),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
@@ -43,7 +63,7 @@ func main() {
 		}
 	}()
 
-
+	// startup server
 	log.Printf("startup http-server on %v", server.Addr)
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("server fail: %v", err)

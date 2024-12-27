@@ -208,7 +208,8 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "example": 0
           }
         ],
         "responses": {
