@@ -2,14 +2,19 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 
 	"lavka/internal/api"
 	"lavka/internal/config"
@@ -27,6 +32,17 @@ func main() {
 	}
 
 	setupLogger(cfg.Logger)
+
+	db, err := openDB(cfg.DB)
+	if err != nil {
+		logFatal("can't open db", err)
+	}
+	defer db.Close()
+
+	// up migrations
+	if err := goose.Up(db, "migrations"); err != nil {
+		logFatal("can't up migrations", err)
+	}
 
 	mux := http.NewServeMux()
 
@@ -70,6 +86,34 @@ func setupLogger(cfg config.Logger) {
 	}
 
 	slog.SetDefault(slog.New(h))
+}
+
+func openDB(cfg config.DB) (*sql.DB, error) {
+	const op = "openDB"
+
+	// urlExample := "postgres://username:password@localhost:5432/database_name"
+	url := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.Name,
+	)
+
+	db, err := sql.Open("pgx", url)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return db, nil
 }
 
 func setupServer(cfg config.Server, router http.Handler) *http.Server {

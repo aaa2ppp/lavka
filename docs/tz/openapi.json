@@ -113,7 +113,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompleteOrderRequestDto"
+                "$ref": "#/components/schemas/CompleteOrderRequest"
               }
             }
           },
@@ -640,7 +640,7 @@
       "BadRequestResponse": {
         "type": "object"
       },
-      "CompleteOrder": {
+      "CompleteOrderDto": {
         "required": [
           "complete_time",
           "courier_id",
@@ -662,7 +662,7 @@
           }
         }
       },
-      "CompleteOrderRequestDto": {
+      "CompleteOrderRequest": {
         "required": [
           "complete_info"
         ],
@@ -671,7 +671,7 @@
           "complete_info": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CompleteOrder"
+              "$ref": "#/components/schemas/CompleteOrderDto"
             }
           }
         }

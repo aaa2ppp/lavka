@@ -20,6 +20,11 @@ type Server struct {
 }
 
 type DB struct {
+	User     string
+	Password string
+	Host     string
+	Port     int
+	Name     string
 }
 
 type Swagger struct {
@@ -47,6 +52,12 @@ func Load() (Config, error) {
 			ReadTimeout:     ge.Duration("SERVER_READ_TIMEOUT", !required, 10*time.Second),
 			ShutdownTimeout: ge.Duration("SERVER_SHUTDOWN_TIMEOUT", !required, 10*time.Second),
 		},
-		DB: DB{},
+		DB: DB{
+			User:     ge.String("DB_USER", required, ""),
+			Password: ge.String("DB_PASS", required, ""),
+			Host:     ge.String("DB_HOST", !required, "localhost"),
+			Port:     ge.Int("DB_PORT", !required, 5432),
+			Name:     ge.String("DB_NAME", required, ""),
+		},
 	}, ge.Err()
 }

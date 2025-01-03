@@ -37,7 +37,7 @@ func ParseDayTime(s string) (int, error) {
 
 	hh, err := strconv.ParseUint(s[:2], 10, 64)
 	if err != nil {
-		return 0, errors.New("hours met be unsigned integer")
+		return 0, errors.New("hours must be unsigned integer")
 	}
 	if !(0 <= hh && hh <= 23) {
 		return 0, errors.New("hours must be in [0..23]")
@@ -45,10 +45,10 @@ func ParseDayTime(s string) (int, error) {
 
 	mm, err := strconv.ParseUint(s[3:], 10, 64)
 	if err != nil {
-		return 0, errors.New("minutes met be unsigned integer")
+		return 0, errors.New("minutes must be unsigned integer")
 	}
-	if !(0 <= mm && hh <= 59) {
-		return 0, errors.New("hours must be in [0..59]")
+	if !(0 <= mm && mm <= 59) {
+		return 0, errors.New("minutes must be in [0..59]")
 	}
 
 	return int(hh*60 + mm), nil

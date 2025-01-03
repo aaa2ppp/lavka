@@ -1,9 +1,13 @@
 package api
 
+import (
+	. "lavka/internal/api/model"
+)
+
 type ServiceStub struct{}
 
 // ComleteOrder implements Service.
-func (f ServiceStub) ComleteOrder([]CompleteOrder) ([]OrderDto, error) {
+func (f ServiceStub) ComleteOrder([]CompleteOrderDto) ([]OrderDto, error) {
 	zero := []OrderDto{}
 	return zero, nil
 }
