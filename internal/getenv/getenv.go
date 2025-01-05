@@ -35,7 +35,7 @@ func (ge *Getenv) String(key string, required bool, defaultValue string) string 
 	}
 
 	if required {
-		ge.err = fmt.Errorf("%s %w", key, ErrEnvRequired)
+		ge.err = fmt.Errorf("%s: %w", key, ErrEnvRequired)
 		return ""
 	}
 

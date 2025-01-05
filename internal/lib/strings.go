@@ -1,6 +1,8 @@
 package lib
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 func StringAsBytes(s string) []byte {
 	return unsafe.Slice(unsafe.StringData(s), len(s))

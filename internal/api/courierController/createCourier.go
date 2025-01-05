@@ -1,12 +1,11 @@
 package courierController
 
 import (
-	"lavka/internal/api/helper"
 	"net/http"
 )
 
 func (c controller) createCourier(w http.ResponseWriter, r *http.Request) {
-	x := helper.New("createCourier", w, r)
+	x := newHelper(w, r, "createCourier")
 
 	var req createCourierRequest
 
@@ -15,7 +14,7 @@ func (c controller) createCourier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	couriers, err := c.CreateCourier(req.Couriers)
+	couriers, err := c.CreateCourier(x.Ctx(), req.Couriers)
 	if err != nil {
 		x.WriteError(err)
 		return

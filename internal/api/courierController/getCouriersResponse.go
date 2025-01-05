@@ -1,11 +1,11 @@
 package courierController
 
 import (
-	m "lavka/internal/api/model"
+	"lavka/internal/model"
 )
 
 type getCouriersResponse struct {
-	Couriers []m.CourierDto
+	Couriers []model.CourierDto
 	Limit    int
 	Offset   int
 }

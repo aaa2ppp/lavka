@@ -1,22 +1,23 @@
 package courierController
 
 import (
+	"context"
 	"net/http"
 
-	m "lavka/internal/api/model"
+	"lavka/internal/model"
 )
 
-type Service interface {
-	CreateCourier(couriers []m.CreateCourierDto) ([]m.CourierDto, error)
-	GetCourierById(courierID uint64) (m.CourierDto, error)
-	GetCouriers(limit, offset int) ([]m.CourierDto, error)
+type CourierService interface {
+	CreateCourier(context.Context, []model.CreateCourierDto) ([]model.CourierDto, error)
+	GetCourierById(_ context.Context, courierID uint64) (model.CourierDto, error)
+	GetCouriers(_ context.Context, limit, offset int) ([]model.CourierDto, error)
 }
 
 type controller struct {
-	Service
+	CourierService
 }
 
-func Setup(mux *http.ServeMux, service Service) {
+func Setup(mux *http.ServeMux, service CourierService) {
 	c := controller{service}
 	mux.Handle("POST /couriers", http.HandlerFunc(c.createCourier))
 	mux.Handle("GET  /couriers/{id}", http.HandlerFunc(c.getCourierById))

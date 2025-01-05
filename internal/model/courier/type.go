@@ -29,7 +29,7 @@ func (t Type) IsZero() bool {
 	return t == 0
 }
 
-func ParseCourierType(s string) (Type, error) {
+func ParseType(s string) (Type, error) {
 	switch s {
 	case s_foot:
 		return FootCourier, nil

@@ -1,9 +1,9 @@
 package courierController
 
 import (
-	m "lavka/internal/api/model"
+	"lavka/internal/model"
 )
 
 type createCourierResponse struct {
-	Couriers []m.CourierDto `json:"couriers,omitempty"`
+	Couriers []model.CourierDto `json:"couriers,omitempty"`
 }

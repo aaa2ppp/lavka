@@ -1,23 +1,24 @@
 package orderController
 
 import (
+	"context"
 	"net/http"
 
-	. "lavka/internal/api/model"
+	. "lavka/internal/model"
 )
 
-type Service interface {
-	CreateOrder(orders []CreateOrderDto) ([]OrderDto, error)
-	GetOrder(orderID uint64) (OrderDto, error)
-	GetOrders(limit, offset int) ([]OrderDto, error)
-	ComleteOrder([]CompleteOrderDto) ([]OrderDto, error)
+type OrderService interface {
+	CreateOrder(context.Context, []CreateOrderDto) ([]OrderDto, error)
+	GetOrder(_ context.Context, orderID uint64) (OrderDto, error)
+	GetOrders(_ context.Context, limit, offset int) ([]OrderDto, error)
+	ComleteOrder(context.Context, []CompleteOrderDto) ([]OrderDto, error)
 }
 
 type controller struct {
-	Service
+	OrderService
 }
 
-func Setup(mux *http.ServeMux, service Service) {
+func Setup(mux *http.ServeMux, service OrderService) {
 	c := controller{service}
 	mux.Handle("POST /orders", http.HandlerFunc(c.createOrder))
 	mux.Handle("GET  /orders/{id}", http.HandlerFunc(c.getOrder))

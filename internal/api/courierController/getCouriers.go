@@ -2,12 +2,10 @@ package courierController
 
 import (
 	"net/http"
-
-	"lavka/internal/api/helper"
 )
 
 func (c controller) getCouriers(w http.ResponseWriter, r *http.Request) {
-	x := helper.New("getCouriers", w, r)
+	x := newHelper(w, r, "getCouriers")
 
 	limit, offset, err := x.GetLimitOffset(1, 0)
 	if err != nil {
@@ -15,7 +13,7 @@ func (c controller) getCouriers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	couriers, err := c.GetCouriers(limit, offset)
+	couriers, err := c.GetCouriers(x.Ctx(), limit, offset)
 	if err != nil {
 		x.WriteError(err)
 		return

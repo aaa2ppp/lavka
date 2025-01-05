@@ -1,22 +1,25 @@
 package courierController
 
 import (
-	m "lavka/internal/api/model"
+	"errors"
+	"fmt"
+	
+	"lavka/internal/model"
 )
 
 type createCourierRequest struct {
-	Couriers []m.CreateCourierDto `json:"couriers,omitempty"`
+	Couriers []model.CreateCourierDto `json:"couriers,omitempty"`
 }
 
 func (v createCourierRequest) Validate() error {
 
 	if len(v.Couriers) == 0 {
-		return m.ErrCannotBeEmpty("couriers")
+		return errors.New("couriers cannot be empty")
 	}
 
 	for i := range v.Couriers {
 		if err := v.Couriers[i].Validate(); err != nil {
-			return m.ErrItemError("couriers", i, err)
+			return fmt.Errorf("couriers[%d]: %w", i, err)
 		}
 	}
 

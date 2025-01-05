@@ -2,12 +2,10 @@ package orderController
 
 import (
 	"net/http"
-
-	"lavka/internal/api/helper"
 )
 
 func (c controller) createOrder(w http.ResponseWriter, r *http.Request) {
-	x := helper.New("createOrder", w, r)
+	x := newHelper(w, r, "createOrder")
 
 	var req createOrderRequest
 
@@ -16,7 +14,7 @@ func (c controller) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orders, err := c.CreateOrder(req.Orders)
+	orders, err := c.CreateOrder(x.Ctx(), req.Orders)
 	if err != nil {
 		x.WriteError(err)
 		return

@@ -8,8 +8,8 @@ import (
 )
 
 type Service interface {
-	courierController.Service
-	orderController.Service
+	courierController.CourierService
+	orderController.OrderService
 }
 
 func New(service Service) http.Handler {

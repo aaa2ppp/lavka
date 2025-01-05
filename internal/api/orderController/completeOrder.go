@@ -2,12 +2,10 @@ package orderController
 
 import (
 	"net/http"
-
-	"lavka/internal/api/helper"
 )
 
 func (c controller) completeOrder(w http.ResponseWriter, r *http.Request) {
-	x := helper.New("completeOrder", w, r)
+	x := newHelper(w, r, "completeOrder")
 
 	var req completeOrderRequest
 	if err := x.ParseBody(&req); err != nil {
@@ -15,7 +13,7 @@ func (c controller) completeOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orders, err := c.ComleteOrder(req.CompleteInfo)
+	orders, err := c.ComleteOrder(x.Ctx(), req.CompleteInfo)
 	if err != nil {
 		x.WriteError(err)
 		return

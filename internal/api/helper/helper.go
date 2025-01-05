@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,27 +12,35 @@ import (
 	"lavka/internal/logger"
 )
 
-const loggerGroup = "api"
-
 type Validator interface {
 	Validate() error
 }
 
 type Helper struct {
-	op string
 	w  http.ResponseWriter
 	r  *http.Request
+	gr string
+	op string
 	l  *slog.Logger
 }
 
-func New(op string, w http.ResponseWriter, r *http.Request) *Helper {
-	return &Helper{op: op, w: w, r: r}
+func New(w http.ResponseWriter, r *http.Request, gr, op string) *Helper {
+	return &Helper{
+		w:  w,
+		r:  r,
+		gr: gr,
+		op: op,
+	}
+}
+
+func (x *Helper) Ctx() context.Context {
+	return x.r.Context()
 }
 
 func (x *Helper) Log() *slog.Logger {
 	if x.l == nil {
 		x.l = logger.GetLoggerFromContextOrDefault(x.r.Context()).
-			WithGroup(loggerGroup).With("op", x.op)
+			WithGroup(x.gr).With("op", x.op)
 	}
 	return x.l
 }

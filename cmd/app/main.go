@@ -17,10 +17,19 @@ import (
 	"github.com/pressly/goose/v3"
 
 	"lavka/internal/api"
+	"lavka/internal/api/courierController"
+	"lavka/internal/api/orderController"
 	"lavka/internal/config"
 	"lavka/internal/middleware"
+	"lavka/internal/repo/courierRepo"
+	"lavka/internal/repo/orderRepo"
 	"lavka/internal/swagger"
 )
+
+type service struct {
+	orderController.OrderService
+	courierController.CourierService
+}
 
 func main() {
 
@@ -50,7 +59,10 @@ func main() {
 		slog.Error("can't setup swagger", "error", err)
 	}
 
-	service := api.ServiceStub{}
+	service := service{
+		OrderService:   orderRepo.New(db),
+		CourierService: courierRepo.New(db),
+	}
 	mux.Handle("/", middleware.Logging(api.New(service)))
 
 	server := setupServer(cfg.Server, mux)

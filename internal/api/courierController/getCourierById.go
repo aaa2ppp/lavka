@@ -1,12 +1,11 @@
 package courierController
 
 import (
-	"lavka/internal/api/helper"
 	"net/http"
 )
 
 func (c controller) getCourierById(w http.ResponseWriter, r *http.Request) {
-	x := helper.New("getCourierById", w, r)
+	x := newHelper(w, r, "getCourierById")
 
 	courierID, err := x.GetID()
 	if err != nil {
@@ -14,7 +13,7 @@ func (c controller) getCourierById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	courier, err := c.GetCourierById(courierID)
+	courier, err := c.GetCourierById(x.Ctx(), courierID)
 	if err != nil {
 		x.WriteError(err)
 		return
