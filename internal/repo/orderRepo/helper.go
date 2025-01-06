@@ -2,8 +2,8 @@ package orderRepo
 
 import (
 	"context"
+	"database/sql"
 	"strings"
-	"time"
 
 	"lavka/internal/model"
 	"lavka/internal/model/daytime"
@@ -22,15 +22,18 @@ func (x xhelper) makeOrderDto(
 	regions int,
 	deliveryHours string,
 	cost int,
-	completedTime time.Time,
+	completedTime sql.NullTime,
 ) (zero model.OrderDto, _ error) {
 
 	resp := model.OrderDto{
-		OrderID:       orderID,
-		Weight:        weight,
-		Regions:       regions,
-		Cost:          cost,
-		CompletedTime: model.NullTime{Time: completedTime},
+		OrderID: orderID,
+		Weight:  weight,
+		Regions: regions,
+		Cost:    cost,
+	}
+
+	if completedTime.Valid {
+		resp.CompletedTime = model.NullTime{Time: completedTime.Time}
 	}
 
 	for _, s := range strings.Split(deliveryHours, ",") {

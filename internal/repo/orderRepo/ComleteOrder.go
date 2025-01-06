@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"lavka/internal/model"
 )
@@ -12,10 +11,13 @@ import (
 func (r OrderRepo) ComleteOrder(ctx context.Context, req []model.CompleteOrderDto) ([]model.OrderDto, error) {
 	x := newHelper(ctx, "ComleteOrder")
 
-	const q = `UPDATE "order" SET completed_time=$1` +
-		` FROM "order" AS o JOIN courier AS c USING(courier_id)` +
-		` WHERE o.order_id=$2 AND o.courier_id=$3` +
-		` RETURNING o.order_id, o.weight, o.regions, o.delivery_hours, o.cost, o.completed_time`
+	// Обработчик должен быть идемпотентным
+	const q = `WITH update_order AS (UPDATE "order" SET completed_time=$1` +
+		` WHERE completed_time IS NULL AND order_id=$2 AND courier_id=$3` +
+		` RETURNING order_id, weight, regions, delivery_hours, cost, completed_time)` +
+		` SELECT order_id, weight, regions, delivery_hours, cost, completed_time` +
+		` FROM "order" WHERE order_id=$2 AND courier_id=$3` +
+		` UNION SELECT * FROM update_order`
 
 	stmt, err := r.db.PrepareContext(ctx, q)
 	if err != nil {
@@ -41,7 +43,7 @@ func (r OrderRepo) ComleteOrder(ctx context.Context, req []model.CompleteOrderDt
 		regions       int
 		deliveryHours string
 		cost          int
-		completedTime time.Time
+		completedTime sql.NullTime
 	)
 
 	for _, p := range req {

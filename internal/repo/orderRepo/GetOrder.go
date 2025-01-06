@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"lavka/internal/model"
 )
@@ -20,7 +19,7 @@ func (r OrderRepo) GetOrder(ctx context.Context, orderID uint64) (zero model.Ord
 		regions       int
 		deliveryHours string
 		cost          int
-		completedTime time.Time
+		completedTime sql.NullTime
 	)
 
 	if err := r.db.QueryRowContext(ctx, q, orderID).

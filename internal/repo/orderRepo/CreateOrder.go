@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"lavka/internal/model"
 )
@@ -12,7 +11,7 @@ import (
 func (r OrderRepo) CreateOrder(ctx context.Context, req []model.CreateOrderDto) ([]model.OrderDto, error) {
 	x := newHelper(ctx, "CreateOrder")
 
-	q := `INSERT INTO "order" (order_id, weight, regions, delivery_hours, cost, completed_time)` +
+	q := `INSERT INTO "order" (order_id, weight, regions, delivery_hours, cost)` +
 		` VALUES (%s)`
 
 	resp := make([]model.OrderDto, 0, len(req))
@@ -34,9 +33,9 @@ func (r OrderRepo) CreateOrder(ctx context.Context, req []model.CreateOrderDto) 
 	)
 
 	for _, it := range resp {
-		placeHolders = append(placeHolders, fmt.Sprintf("$%d,$%d,$%d,$%d,$%d,$%d",
-			idx+1, idx+2, idx+3, idx+4, idx+5, idx+6))
-		idx += 6
+		placeHolders = append(placeHolders, fmt.Sprintf("$%d,$%d,$%d,$%d,$%d",
+			idx+1, idx+2, idx+3, idx+4, idx+5))
+		idx += 5
 
 		var (
 			deliveryHours []string
@@ -52,7 +51,6 @@ func (r OrderRepo) CreateOrder(ctx context.Context, req []model.CreateOrderDto) 
 			it.Regions,
 			strings.Join(deliveryHours, ","),
 			it.Cost,
-			time.Time{}, // zero time
 		)
 	}
 

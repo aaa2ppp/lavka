@@ -2,7 +2,7 @@ package orderRepo
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"lavka/internal/model"
 )
@@ -27,7 +27,7 @@ func (r OrderRepo) GetOrders(ctx context.Context, limit, offset int) ([]model.Or
 		regions       int
 		deliveryHours string
 		cost          int
-		completedTime time.Time
+		completedTime sql.NullTime
 	)
 
 	for rows.Next() {
