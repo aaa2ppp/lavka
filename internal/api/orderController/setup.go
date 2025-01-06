@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"lavka/internal/middleware"
 	. "lavka/internal/model"
 )
 
@@ -18,11 +19,13 @@ type controller struct {
 	OrderService
 }
 
-func Setup(mux *http.ServeMux, service OrderService) {
+var limitRPS = middleware.LimitRPS
+
+func Setup(mux *http.ServeMux, service OrderService, rps int) {
 	c := controller{service}
-	mux.Handle("POST /orders", http.HandlerFunc(c.createOrder))
-	mux.Handle("GET  /orders/{id}", http.HandlerFunc(c.getOrder))
-	mux.Handle("GET  /orders", http.HandlerFunc(c.getOrders))
-	mux.Handle("POST /orders/complete", http.HandlerFunc(c.completeOrder))
-	mux.Handle("POST /orders/assign", http.HandlerFunc(c.ordersAssign))
+	mux.Handle("POST /orders", limitRPS(rps, http.HandlerFunc(c.createOrder)))
+	mux.Handle("GET  /orders/{id}", limitRPS(rps, http.HandlerFunc(c.getOrder)))
+	mux.Handle("GET  /orders", limitRPS(rps, http.HandlerFunc(c.getOrders)))
+	mux.Handle("POST /orders/complete", limitRPS(rps, http.HandlerFunc(c.completeOrder)))
+	mux.Handle("POST /orders/assign", limitRPS(rps, http.HandlerFunc(c.ordersAssign)))
 }

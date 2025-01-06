@@ -63,7 +63,7 @@ func main() {
 		OrderService:   orderRepo.New(db),
 		CourierService: courierRepo.New(db),
 	}
-	mux.Handle("/", middleware.Logging(api.New(service)))
+	mux.Handle("/", middleware.Logging(api.New(service, cfg.Endpoint.RPS)))
 
 	server := setupServer(cfg.Server, mux)
 

@@ -30,11 +30,16 @@ type DB struct {
 type Swagger struct {
 }
 
+type Endpoint struct {
+	RPS int
+}
+
 type Config struct {
-	Logger  Logger
-	Server  Server
-	DB      DB
-	Swagger Swagger
+	Logger   Logger
+	Server   Server
+	DB       DB
+	Swagger  Swagger
+	Endpoint Endpoint
 }
 
 func Load() (Config, error) {
@@ -58,6 +63,9 @@ func Load() (Config, error) {
 			Host:     ge.String("DB_HOST", !required, "localhost"),
 			Port:     ge.Int("DB_PORT", !required, 5432),
 			Name:     ge.String("DB_NAME", required, ""),
+		},
+		Endpoint: Endpoint{
+			RPS: ge.Int("ENDPOINT_RPS", !required, 10),
 		},
 	}, ge.Err()
 }
