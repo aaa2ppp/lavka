@@ -17,6 +17,7 @@ func (r CourierRepo) GetCouriers(ctx context.Context, limit int, offset int) ([]
 		x.Log().Error("can't query", "error", err, "q", q, "limit", limit, "offset", offset)
 		return nil, model.ErrInternalError
 	}
+	defer rows.Close()
 
 	resp := make([]model.CourierDto, 0, limit)
 

@@ -18,6 +18,7 @@ func (r OrderRepo) GetOrders(ctx context.Context, limit, offset int) ([]model.Or
 		x.Log().Error("can't query", "error", err, "q", q, "limit", limit, "offset", offset)
 		return nil, model.ErrInternalError
 	}
+	defer rows.Close()
 
 	resp := make([]model.OrderDto, 0, limit)
 
