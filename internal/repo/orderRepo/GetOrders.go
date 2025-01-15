@@ -46,5 +46,10 @@ func (r OrderRepo) GetOrders(ctx context.Context, limit, offset int) ([]model.Or
 		resp = append(resp, order)
 	}
 
+	if err := rows.Err(); err != nil {
+		x.Log().Error("can't get next row", "error", err)
+		return nil, model.ErrInternalError
+	}
+
 	return resp, nil
 }

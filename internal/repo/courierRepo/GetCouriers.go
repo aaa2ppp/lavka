@@ -42,5 +42,10 @@ func (r CourierRepo) GetCouriers(ctx context.Context, limit int, offset int) ([]
 		resp = append(resp, it)
 	}
 
+	if err := rows.Err(); err != nil {
+		x.Log().Error("can't get next row", "error", err)
+		return nil, model.ErrInternalError
+	}
+
 	return resp, nil
 }
